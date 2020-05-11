@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Git credentials
+cat << EOF > ./.git-credentials
+https://"${GITLAB_USERNAME}":"${GITLAB_PASSWORD}"@gitlab.com
+EOF
+
+# DB init SQL
+cat << EOF > ./.db-init/init.sql
+CREATE USER "${KC_DB_USERNAME}" WITH PASSWORD '"${KC_DB_PASSWORD}"';
+CREATE DATABASE keycloak;
+GRANT ALL PRIVILEGES ON DATABASE "keycloak" TO "${KC_DB_USERNAME}";
+EOF
+
+# Environment file
+cat << EOF > ./.env
+DB_ROOT_USERNAME="${DB_ROOT_USERNAME}"
+DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}"
+KC_DB_USERNAME="${KC_DB_USERNAME}"
+KC_DB_PASSWORD="${KC_DB_PASSWORD}"
+KC_ROOT_USERNAME="${KC_ROOT_USERNAME}"
+KC_ROOT_PASSWORD="${KC_ROOT_PASSWORD}"
+EOF

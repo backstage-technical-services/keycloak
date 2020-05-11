@@ -1,0 +1,64 @@
+version: '2.4'
+
+networks:
+  keycloak:
+    name: keycloak
+
+services:
+  nginx:
+    image: registry.gitlab.com/backstage-technical-services/website/keycloak/nginx:stable-alpine
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - keycloak
+    ports:
+      - 443:443
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    restart: on-failure
+    mem_limit: 256m
+
+  database:
+    image: registry.gitlab.com/backstage-technical-services/website/keycloak/postgres:12-alpine
+    networks:
+      - keycloak
+    volumes:
+      - ./.db-init.d:/docker-entrypoint-initdb.d
+      - /var/data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_ROOT_USERNAME}
+      POSTGRES_PASSWORD: ${DB_ROOT_PASSWORD}
+    healthcheck:
+      test: ['CMD-SHELL', "pg_isready -U ${DB_ROOT_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+    mem_limit: 1g
+
+  keycloak:
+    image: registry.gitlab.com/backstage-technical-services/website/keycloak/keycloak:10.0.1
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - keycloak
+    environment:
+      PROXY_ADDRESS_FORWARDING: 'true'
+      KEYCLOAK_FRONTEND_URL: https://keycloak.bts-crew.com/auth
+      DB_VENDOR: postgres
+      DB_ADDR: database
+      DB_PORT: 5432
+      DB_DATABASE: keycloak
+      DB_USER: ${KC_DB_USERNAME}
+      DB_PASSWORD: ${KC_DB_PASSWORD}
+      KEYCLOAK_USER: ${KC_ROOT_USERNAME}
+      KEYCLOAK_PASSWORD: ${KC_ROOT_PASSWORD}
+    healthcheck:
+      test: ['CMD-SHELL','curl -s http://localhost:8080/auth/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+    mem_limit: 2g
