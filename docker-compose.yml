@@ -6,7 +6,7 @@ networks:
 
 services:
   nginx:
-    image: registry.gitlab.com/backstage-technical-services/website/keycloak/nginx:stable-alpine
+    image: docker.pkg.github.com/backstage-technical-services/keycloak/nginx:stable-alpine
     depends_on:
       keycloak:
         condition: service_healthy
@@ -20,7 +20,7 @@ services:
     mem_limit: 256m
 
   database:
-    image: registry.gitlab.com/backstage-technical-services/website/keycloak/postgres:12-alpine
+    image: docker.pkg.github.com/backstage-technical-services/keycloak/postgres:12-alpine
     networks:
       - keycloak
     volumes:
@@ -38,7 +38,7 @@ services:
     mem_limit: 1g
 
   keycloak:
-    image: registry.gitlab.com/backstage-technical-services/website/keycloak/keycloak:10.0.1
+    image: docker.pkg.github.com/backstage-technical-services/keycloak/keycloak:10.0.1
     depends_on:
       database:
         condition: service_healthy
