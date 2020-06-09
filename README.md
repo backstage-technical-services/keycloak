@@ -1,3 +1,3 @@
 # Keycloak
 
-[![pipeline status](https://gitlab.com/backstage-technical-services/website/keycloak/badges/master/pipeline.svg)](https://gitlab.com/backstage-technical-services/website/keycloak/-/commits/master)
+![Deploy](https://github.com/backstage-technical-services/keycloak/workflows/Deploy/badge.svg)

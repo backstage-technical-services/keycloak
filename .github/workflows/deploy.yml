@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [nginx, postgres, keycloak]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Store token
+        run: echo ${{ secrets.GITHUB_TOKEN }} > .github_token
+      - name: ${{ matrix.image }}
+        run: |
+          scripts/build.sh ${{ matrix.image }}
+          scripts/push.sh ${{ matrix.image }}

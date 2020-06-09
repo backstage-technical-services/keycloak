@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# Git credentials
-cat << EOF > ./.git-credentials
-https://"${GITLAB_USERNAME}":"${GITLAB_PASSWORD}"@gitlab.com
-EOF
-
 # DB init SQL
 cat << EOF > ./.db-init/init.sql
 CREATE USER "${KC_DB_USERNAME}" WITH PASSWORD '"${KC_DB_PASSWORD}"';
