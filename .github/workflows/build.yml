@@ -1,0 +1,17 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [nginx, postgres, keycloak]
+    steps:
+      - uses: actions/checkout@v2
+      - name: ${{ matrix.image }}
+        run: scripts/build.sh ${{ matrix.image }}

@@ -18,7 +18,7 @@ apt install -y certbot
 # Clone repository
 mkdir -p /opt/keycloak
 cd /opt/keycloak
-git clone https://gitlab.com/backstage-technical-services/website/keycloak.git .
+git clone https://github.com/backstage-technical-services/keycloak.git .
 
 # Move config
 mv /opt/provision/.env /opt/keycloak/.env
