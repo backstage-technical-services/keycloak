@@ -39,7 +39,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - "[ $(curl -s -f http://localhost:9000/health | jq -r '.status') == 'UP' ]"
+                - '[ $(curl -s -f http://localhost:9000/health | jq -r ".status") == "UP" ]'
           livenessProbe:
             initialDelaySeconds: 5
             periodSeconds: 30
@@ -47,7 +47,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - "[ $(curl -s -f http://localhost:9000/health | jq -r '.status') == 'UP' ]"
+                - '[ $(curl -s -f http://localhost:9000/health | jq -r ".status") == "UP" ]'
       nodeSelector:
         bnjns.uk/owner: backstage
       tolerations:
