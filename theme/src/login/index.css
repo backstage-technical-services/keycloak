@@ -1,0 +1,65 @@
+@import url(./assets/fonts/geist/index.css);
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body.kcBodyClass {
+    @apply bg-none;
+    @apply bg-black;
+    @apply font-geist;
+    font-size: 14px;
+    @apply leading-relaxed;
+}
+
+.kcHeaderWrapperClass {
+    @apply mx-0 mt-0 mb-4;
+    @apply p-0;
+    @apply text-bts-yellow;
+    @apply text-4xl !important;
+
+    img {
+        @apply my-0 mx-auto;
+        max-width: 500px;
+    }
+}
+
+.kcFormCardClass {
+    @apply border-bts-yellow;
+}
+
+h1#kc-page-title {
+    @apply mb-4;
+}
+
+a, a:visited {
+    /*@apply text-bts-yellow;*/
+    @apply no-underline;
+
+    &:hover {
+        /*@apply text-bts-yellow;*/
+        @apply text-inherit;
+        @apply cursor-pointer;
+        @apply underline;
+    }
+}
+/*.pf-c-button.pf-m-control, .kcButtonClass.kcButtonPrimaryClass {*/
+/*    @apply bg-[#777];*/
+/*    @apply text-white;*/
+/*    @apply inline-block;*/
+/*    @apply text-base;*/
+/*    @apply font-light;*/
+/*    @apply mb-2;*/
+/*}*/
+
+.kcButtonClass.kcButtonPrimaryClass {
+    @apply bg-bts-yellow;
+    @apply text-black;
+}
+.pf-c-button.pf-m-control {
+    &:hover, &:active {
+        --pf-c-button--m-control--after--BorderBottomColor: #333;
+        @apply text-[#333];
+        @apply no-underline;
+    }
+}
