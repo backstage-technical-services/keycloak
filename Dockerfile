@@ -15,14 +15,31 @@ RUN dnf install \
 RUN dnf --installroot /mnt/rootfs clean all && \
     rpm --root /mnt/rootfs -e --nodeps setup
 
+FROM maven:3-eclipse-temurin-21 AS cas-builder
+
+ARG KC_VERSION
+
+RUN apt-get update -y \
+    && apt-get install -y \
+      git
+
+WORKDIR /opt
+
+RUN git clone https://github.com/RoboJackets/keycloak-cas.git \
+    && cd keycloak-cas \
+    && git checkout d397dfae68fc163d5e056378f434d7efdda8ed8f \
+    && mvn package
+
 FROM quay.io/keycloak/keycloak:${KC_VERSION} AS builder
+
+ARG KC_VERSION
 
 ADD --chown=keycloak:keycloak --chmod=644 \
   https://github.com/aerogear/keycloak-metrics-spi/releases/download/7.0.0/keycloak-metrics-spi-7.0.0.jar \
   /opt/keycloak/providers/keycloak-metrics-spi.jar
-ADD --chown=keycloak:keycloak --chmod=644 \
-  https://github.com/jacekkow/keycloak-protocol-cas/releases/download/26.3.0/keycloak-protocol-cas-26.3.0.jar \
-  /opt/keycloak/providers/keycloak-protocol-cas.jar
+COPY --from=cas-builder --chown=keycloak:keycloak --chmod=644 \
+  /opt/keycloak-cas/target/keycloak-cas-services-${KC_VERSION}-SNAPSHOT.jar \
+  /opt/keycloak/providers/keycloak-cas-services.jar
 ADD --chown=keycloak:keycloak --chmod=644 \
   https://github.com/sventorben/keycloak-restrict-client-auth/releases/download/v26.0.0/keycloak-restrict-client-auth.jar \
   /opt/keycloak/providers/keycloak-restrict-client-auth.jar
