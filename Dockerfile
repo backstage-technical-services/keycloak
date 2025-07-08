@@ -52,8 +52,7 @@ RUN /opt/keycloak/bin/kc.sh build \
     --metrics-enabled=true \
     --features="docker,client-secret-rotation,admin-fine-grained-authz,opentelemetry,persistent-user-sessions" \
     --features-disabled="kerberos,multi-site" \
-    --spi-restrict-client-auth-access-provider-client-role-enabled=true \
-    --spi-restrict-client-auth-access-provider-client-role-client-role-name=client-access \
+    --spi-restrict-client-auth-access-provider--client-role--enabled=true \
     --db=postgres
 
 FROM quay.io/keycloak/keycloak:${KC_VERSION}
@@ -64,6 +63,6 @@ ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 CMD [ \
   "start", \
   "--optimized", \
-  "--spi-restrict-client-auth-access-provider-client-role-enabled=true", \
-  "--spi-restrict-client-auth-access-provider-client-role-client-role-name=client-access" \
+  "--spi-restrict-client-auth-access-provider--client-role--enabled=true", \
+  "--spi-restrict-client-auth-access-provider--client-role-client--role-name=client-access" \
 ]
