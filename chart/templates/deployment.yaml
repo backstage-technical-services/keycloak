@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      name: {{ include "keycloak.fullname" . }}
+      annotations:
+        k8s.grafana.com/scrape: 'true'
+        k8s.grafana.com/metricsPath: '/metrics'
+        k8s.grafana.com/metricsPortNumber: '9000'
+      labels:
+        {{- include "keycloak.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: keycloak
+          image: 'ghcr.io/backstage-technical-services/keycloak:{{ .Values.image.tag }}'
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: {{ include "keycloak.fullname" . }}
+            - configMapRef:
+                name: {{ include "keycloak.fullname" . }}
+          resources:
+            requests:
+              memory: '1Gi'
+            limits:
+              memory: '2Gi'
+          readinessProbe:
+            periodSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "[ $(curl -s -f http://localhost:9000/health | jq -r '.status') == 'UP' ]"
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "[ $(curl -s -f http://localhost:9000/health | jq -r '.status') == 'UP' ]"
+      nodeSelector:
+        bnjns.uk/owner: backstage
+      tolerations:
+        - key: bnjns.uk/reserved-for
+          operator: Equal
+          value: backstage
+          effect: NoSchedule
