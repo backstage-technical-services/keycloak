@@ -11,29 +11,61 @@ spec:
   ports:
     - port: 8080
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: cert-manager.io/v1
+kind: Certificate
 metadata:
   name: {{ include "keycloak.fullname" . }}
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt
-    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-http-to-https@kubernetescrd
 spec:
-  ingressClassName: traefik
-  rules:
-    - host: auth.bts-crew.com
-      http:
-        paths:
-          - backend:
-              service:
-                name: {{ include "keycloak.fullname" . }}
-                port:
-                  number: 8080
-            path: /
-            pathType: Prefix
+  secretName: {{ include "keycloak.fullname" . }}-tls
+  dnsNames:
+    - auth.bts-crew.com
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "keycloak.fullname" . }}-http
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`auth.bts-crew.com`)
+      middlewares:
+        - name: redirect-http-to-https
+      services:
+        - kind: TraefikService
+          name: noop@internal
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "keycloak.fullname" . }}-https
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`auth.bts-crew.com`) && PathPrefix(`/realms/{realm:.*}/metrics`)
+      middlewares:
+        - name: ip-allowlist-internal
+      services:
+        - kind: Service
+          name: {{ include "keycloak.fullname" . }}
+          port: 8080
+    - kind: Rule
+      match: Host(`auth.bts-crew.com`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: {{ include "keycloak.fullname" . }}
+          port: 8080
   tls:
-    - hosts:
-        - auth.bts-crew.com
-      secretName: {{ include "keycloak.fullname" . }}-tls
+    secretName: {{ include "keycloak.fullname" . }}-tls
