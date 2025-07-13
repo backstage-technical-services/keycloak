@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: 'ghcr.io/backstage-technical-services/keycloak:{{ .Values.image.tag }}'
+          image: '685624812686.dkr.ecr.eu-west-1.amazonaws.com/backstage-keycloak:{{ .Values.image.tag }}'
           imagePullPolicy: Always
           envFrom:
             - secretRef:
