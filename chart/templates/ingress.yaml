@@ -65,6 +65,14 @@ spec:
           name: {{ include "keycloak.fullname" . }}
           port: 8080
     - kind: Rule
+      match: Host(`auth.bts-crew.com`) && PathRegexp(`^/admin/.+/console`)
+      middlewares:
+        - name: ip-allowlist-trusted
+      services:
+        - kind: Service
+          name: {{ include "keycloak.fullname" . }}
+          port: 8080
+    - kind: Rule
       match: Host(`auth.bts-crew.com`) && PathPrefix(`/`)
       middlewares:
         - name: rate-limit
