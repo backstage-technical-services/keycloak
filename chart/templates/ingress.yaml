@@ -57,7 +57,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`auth.bts-crew.com`) && PathPrefix(`/realms/{realm:.*}/metrics`)
+      match: Host(`auth.bts-crew.com`) && PathRegexp(`^/realms/.+/metrics`)
       middlewares:
         - name: ip-allowlist-internal
       services:
