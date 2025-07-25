@@ -10,6 +10,8 @@
 helm.sh/chart: {{ include "keycloak.chart" . }}
 app.kubernetes.io/name: {{ include "keycloak.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+bnjns.uk/owner: backstage
+backstage.uk/app: keycloak
 {{ include "keycloak.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
