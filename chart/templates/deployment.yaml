@@ -14,8 +14,9 @@ spec:
       name: {{ include "keycloak.fullname" . }}
       annotations:
         k8s.grafana.com/scrape: 'true'
-        k8s.grafana.com/metricsPath: '/realms/master/metrics'
-        k8s.grafana.com/metricsPortNumber: '9000'
+        k8s.grafana.com/metrics.path: '/realms/master/metrics'
+        k8s.grafana.com/metrics.portNumber: '8080'
+        k8s.grafana.com/metrics.scrapeInterval: '1m'
       labels:
         {{- include "keycloak.labels" . | nindent 8 }}
     spec:
