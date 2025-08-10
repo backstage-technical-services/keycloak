@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - .github/ISSUE_TEMPLATE/**
+      - .github/DISCUSSION_TEMPLATE/**
+      - .github/*.yml
+      - .github/*.md
+
+env:
+  ECR_URL: ${{ vars.ECR_BASE_URL }}/backstage-keycloak
+  KC_VERSION: '26.3.0'
+
+jobs:
+  push-image:
+    name: Push image
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            tag: amd64
+          - runner: ubuntu-22.04-arm
+            tag: arm64
+    steps:
+      - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ vars.IMAGE_PUSH_ROLE_ARN }}
+      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: Dockerfile
+          cache-from: type=registry,ref=${{ env.ECR_URL }}:cache-${{ matrix.tag }}
+          cache-to: type=registry,ref=${{ env.ECR_URL }}:cache-${{ matrix.tag }}
+          provenance: false
+          tags: |
+            ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}-${{ matrix.tag }}
+
+  manifest:
+    name: Create manifest
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    needs: [push-image]
+    steps:
+      - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ vars.IMAGE_PUSH_ROLE_ARN }}
+      - name: Log into ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Create manifest
+        run: |
+          docker manifest create ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }} \
+            --amend ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}-amd64 \
+            --amend ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}-arm64
+          docker manifest push ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}

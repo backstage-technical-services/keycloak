@@ -1,2 +1,6 @@
 *
-!theme/dist_keycloak/*.jar
+!theme/*
+theme/.storybook/
+theme/node_modules/
+theme/dist/
+theme/dist_keycloak/
