@@ -1,0 +1,46 @@
+name: Build
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  ECR_URL: ${{ vars.ECR_BASE_URL }}/backstage-keycloak
+  KC_VERSION: '26.3.0'
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            tag: amd64
+          - runner: ubuntu-22.04-arm
+            tag: arm64
+    steps:
+      - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ vars.IMAGE_PUSH_ROLE_ARN }}
+      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          file: Dockerfile
+          cache-from: type=registry,ref=${{ env.ECR_URL }}:cache-${{ matrix.tag }}
+          build-args: |
+            KC_VERSION=${{ env.KC_VERSION }}
+          tags: |
+            ${{ github.repository }}:${{ env.IMAGE_TAG }}-${{ matrix.tag }}
