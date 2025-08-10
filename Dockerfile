@@ -15,6 +15,20 @@ RUN dnf install \
 RUN dnf --installroot /mnt/rootfs clean all && \
     rpm --root /mnt/rootfs -e --nodeps setup
 
+FROM maven:3-eclipse-temurin-21 AS theme-builder
+
+RUN apt-get update -y \
+    && apt-get install -y \
+      nodejs \
+      npm \
+    && npm install --global yarn
+
+COPY theme /app/theme
+WORKDIR /app/theme
+
+RUN yarn install --frozen-lockfile \
+    && yarn build:theme
+
 FROM maven:3-eclipse-temurin-21 AS cas-builder
 
 ARG KC_VERSION
@@ -43,8 +57,8 @@ COPY --from=cas-builder --chown=keycloak:keycloak --chmod=644 \
 ADD --chown=keycloak:keycloak --chmod=644 \
   https://github.com/sventorben/keycloak-restrict-client-auth/releases/download/v26.0.0/keycloak-restrict-client-auth.jar \
   /opt/keycloak/providers/keycloak-restrict-client-auth.jar
-COPY --chown=keycloak:keycloak --chmod=644 \
-  theme/dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar \
+COPY --from=theme-builder --chown=keycloak:keycloak --chmod=644 \
+  /app/theme/dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar \
   /opt/keycloak/providers/keycloak-theme.jar
 
 RUN /opt/keycloak/bin/kc.sh build \
