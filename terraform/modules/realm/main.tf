@@ -83,3 +83,151 @@ resource "keycloak_authentication_bindings" "default" {
   realm_id     = keycloak_realm.default.id
   browser_flow = keycloak_authentication_flow.browser.alias
 }
+
+########################################################################################################################
+# User profile attributes
+########################################################################################################################
+resource "keycloak_realm_user_profile" "default" {
+  realm_id = keycloak_realm.default.id
+
+  attribute {
+    name         = "username"
+    display_name = "$${username}"
+    multi_valued = false
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        min = 3
+        max = 255
+      }
+    }
+
+    validator {
+      name   = "username-prohibited-characters"
+      config = {}
+    }
+
+    validator {
+      name   = "up-username-not-idn-homograph"
+      config = {}
+    }
+  }
+
+  attribute {
+    name         = "email"
+    display_name = "$${email}"
+    multi_valued = false
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name   = "email"
+      config = {}
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = 255
+      }
+    }
+  }
+
+  attribute {
+    name         = "firstName"
+    display_name = "$${firstName}"
+    multi_valued = false
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = 255
+      }
+    }
+
+    validator {
+      name   = "person-name-prohibited-characters"
+      config = {}
+    }
+  }
+
+  attribute {
+    name         = "lastName"
+    display_name = "$${lastName}"
+    multi_valued = false
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = 255
+      }
+    }
+
+    validator {
+      name   = "person-name-prohibited-characters"
+      config = {}
+    }
+  }
+
+  attribute {
+    name         = "mobile"
+    display_name = "Mobile number"
+    multi_valued = false
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "pattern"
+      config = {
+        pattern       = "^(?:(?:\\(?(?:0(?:0|11)\\)?[\\s-]?\\(?|\\+)44\\)?[\\s-]?(?:\\(?0\\)?[\\s-]?)?)|(?:\\(?0))(?:(?:\\d{5}\\)?[\\s-]?\\d{4,5})|(?:\\d{4}\\)?[\\s-]?(?:\\d{5}|\\d{3}[\\s-]?\\d{3}))|(?:\\d{3}\\)?[\\s-]?\\d{3}[\\s-]?\\d{3,4})|(?:\\d{2}\\)?[\\s-]?\\d{4}[\\s-]?\\d{4}))(?:[\\s-]?(?:x|ext\\.?|\\#)\\d{3,4})?$"
+        error-message = "Please enter a valid UK mobile number"
+      }
+    }
+  }
+
+  attribute {
+    name         = "extension"
+    display_name = "Backstage phone extension"
+
+    multi_valued = false
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+  }
+
+  group {
+    name                = "user-metadata"
+    display_header      = "User metadata"
+    display_description = "Attributes, which refer to user metadata"
+  }
+}
