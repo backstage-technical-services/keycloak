@@ -27,6 +27,7 @@ resource "keycloak_role" "default" {
   description = each.value.description
 }
 
+
 resource "keycloak_role" "restrict_account" {
   count = var.restrict_access ? 1 : 0
 
