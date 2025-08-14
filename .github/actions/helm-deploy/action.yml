@@ -1,0 +1,33 @@
+name: Deploy
+description: Deploys Keycloak using the Helm chart
+
+inputs:
+  k8s-url:
+    description: The URL of the K8s API
+    required: true
+  k8s-secret:
+    description: The secret used to authenticate with the K8s API
+    required: true
+  image-tag:
+    description: The tag of the image to deploy
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: azure/setup-kubectl@v4
+    - uses: azure/k8s-set-context@v4
+      with:
+        method: service-account
+        k8s-url: ${{ inputs.k8s-url }}
+        k8s-secret: ${{ inputs.k8s-secret }}
+    - uses: azure/setup-helm@v4
+    - name: deploy
+      shell: bash
+      run: |
+        helm upgrade keycloak \
+          ./chart \
+          --install \
+          -n backstage \
+          --set image.tag="${{ inputs.image-tag }}" \
+          --wait

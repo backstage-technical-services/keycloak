@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
+      - '.github/actions/helm-deploy/action.yml'
       - '.github/workflows/deploy.yml'
+      - 'chart/**/*'
       - 'theme/**/*'
       - 'Dockerfile'
 
@@ -65,3 +67,15 @@ jobs:
             --amend ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}-amd64 \
             --amend ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}-arm64
           docker manifest push ${{ env.ECR_URL }}:${{ env.IMAGE_TAG }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [manifest]
+    steps:
+      - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/helm-deploy
+        with:
+          k8s-url: ${{ vars.K8S_SERVER_URL }}
+          k8s-secret: ${{ secrets.K8S_SERVICE_ACCOUNT_SECRET }}
+          image-tag: ${{ env.IMAGE_TAG }}
