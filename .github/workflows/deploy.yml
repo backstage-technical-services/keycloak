@@ -4,11 +4,10 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - .github/ISSUE_TEMPLATE/**
-      - .github/DISCUSSION_TEMPLATE/**
-      - .github/*.yml
-      - .github/*.md
+    paths:
+      - '.github/workflows/deploy.yml'
+      - 'theme/**/*'
+      - 'Dockerfile'
 
 env:
   ECR_URL: ${{ vars.ECR_BASE_URL }}/backstage-keycloak
