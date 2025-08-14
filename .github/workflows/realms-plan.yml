@@ -1,0 +1,103 @@
+name: Plan Realms
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/realms-plan.yml'
+      - 'terraform/**/*'
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  realm-matrix:
+    name: Realm matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: set-matrix
+        name: Determine realm matrix
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: scripts/detect-changed-realms.sh
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  plan:
+    name: Plan realm
+    runs-on: ubuntu-latest
+    needs: [realm-matrix]
+    if: ${{ github.event_name == 'pull_request' && needs.config-matrix.outputs.matrix != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        realm: ${{ fromJSON(needs.realm-matrix.outputs.matrix) }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform/realms/${{ matrix.realm }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-terraform
+        with:
+          realm: ${{ matrix.realm }}
+          aws-role-arn: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          ssh-private-key: ${{ secrets.TF_MODULES_PRIVATE_SSH_KEY }}
+      - name: init
+        id: init
+        run: terraform init -no-color 2>&1 | tee /tmp/${{ github.run_id }}.init.txt
+      - name: fmt check
+        id: fmt-check
+        run: terraform fmt -check -recursive -no-color 2>&1 | tee /tmp/${{ github.run_id }}.fmt-check.txt
+      - name: validate
+        id: validate
+        run: terraform validate -no-color 2>&1 | tee /tmp/${{ github.run_id }}.validate.txt
+      - name: plan
+        id: plan
+        run: terraform plan -no-color -lock=false -out=plan.out 2>&1 | tee /tmp/${{ github.run_id }}.plan.txt
+      - name: upload plan output
+        run: |
+          aws s3 cp \
+            plan.out \
+            s3://backstage-terraform-plan-outputs/${{ github.repository }}/${{ github.event.pull_request.number }}/${{ matrix.realm }}.out \
+            --profile backstage
+      - name: build comment
+        if: always()
+        id: build-comment
+        uses: actions/github-script@v7
+        env:
+          STEP_INIT_OUTCOME: ${{ steps.init.outcome }}
+          STEP_FMT_CHECK_OUTCOME: ${{ steps.fmt-check.outcome }}
+          STEP_VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          STEP_PLAN_OUTCOME: ${{ steps.plan.outcome }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const { buildComment } = require('./scripts/actions-helpers.js');
+            
+            return buildComment({
+              context,
+              core,
+              command: 'plan',
+              configName: '${{ matrix.realm }}',
+              steps: [
+                { name: 'init' },
+                { name: 'fmt-check' },
+                { name: 'validate' },
+                { name: 'plan' },
+              ]
+            });
+      - name: post comment
+        if: always()
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: ${{ steps.build-comment.outputs.result }}
+          comment_tag: ${{ matrix.realm }}
+          mode: upsert
