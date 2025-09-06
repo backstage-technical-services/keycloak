@@ -28,3 +28,33 @@ module "website_v4_client" {
     "https://www.bts-crew.com",
   ]
 }
+
+
+module "wiki_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "wiki"
+  name            = "Wiki"
+  restrict_access = true
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  service_account_roles = {
+    realm-management = [
+      "manage-users",
+      "query-clients",
+      "view-clients",
+    ]
+  }
+
+  redirect_urls = [
+    "https://wiki.bts-crew.com/*",
+  ]
+  logout_redirect_urls = [
+    "https://wiki.bts-crew.com/*",
+  ]
+}
