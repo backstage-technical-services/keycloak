@@ -43,14 +43,6 @@ module "wiki_client" {
     client_credentials = true
   }
 
-  service_account_roles = {
-    realm-management = [
-      "manage-users",
-      "query-clients",
-      "view-clients",
-    ]
-  }
-
   redirect_urls = [
     "https://wiki.bts-crew.com/*",
   ]
