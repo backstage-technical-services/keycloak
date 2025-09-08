@@ -20,10 +20,5 @@ variable "use_custom_auth_flows" {
 
 // Token config
 variable "access_token_lifespan" {
-  type    = string
-  default = "5m"
-}
-variable "sso_session_idle_timeout" {
-  type    = string
-  default = "30m"
+  type = string
 }
