@@ -22,9 +22,13 @@ resource "keycloak_realm" "default" {
   # Authentication settings
   password_policy = "notUsername and notEmail and notContainsUsername and passwordHistory(3) and length(5)"
 
-  # Tokens
-  access_token_lifespan    = var.access_token_lifespan
-  sso_session_idle_timeout = var.sso_session_idle_timeout
+  # Sessions
+  access_token_lifespan                = var.access_token_lifespan
+  sso_session_idle_timeout             = "${7 * 24}h"
+  sso_session_max_lifespan             = "${14 * 24}h"
+  sso_session_idle_timeout_remember_me = "${30 * 24}h"
+  sso_session_max_lifespan_remember_me = "${90 * 24}h"
+  offline_session_idle_timeout         = "${30 * 24}h"
 
   # Security
   security_defenses {

@@ -12,4 +12,6 @@ module "realm" {
 
   name         = "prod"
   display_name = "Backstage"
+
+  access_token_lifespan = "5m"
 }
