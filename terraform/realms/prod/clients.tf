@@ -50,3 +50,24 @@ module "wiki_client" {
     "https://wiki.bts-crew.com/*",
   ]
 }
+
+module "nextcloud_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "nextcloud"
+  name            = "Nextcloud"
+  restrict_access = true
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  redirect_urls = [
+    "https://nextcloud.bts-crew.com/*",
+  ]
+  logout_redirect_urls = [
+    "https://nextcloud.bts-crew.com/*",
+  ]
+}
