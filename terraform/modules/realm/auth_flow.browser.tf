@@ -84,7 +84,7 @@ resource "keycloak_authentication_execution" "browser_restrict_client_access" {
 resource "keycloak_authentication_execution_config" "browser_restrict_client_access" {
   realm_id     = keycloak_realm.default.id
   execution_id = keycloak_authentication_execution.browser_restrict_client_access.id
-  alias        = "client-access"
+  alias        = "Browser - Restrict Access"
   config = {
     accessProviderId               = "client-role"
     restrictClientAuthErrorMessage = "access-denied"
