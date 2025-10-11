@@ -78,5 +78,5 @@ CMD [ \
   "start", \
   "--optimized", \
   "--spi-restrict-client-auth-access-provider--client-role--enabled=true", \
-  "--spi-restrict-client-auth-access-provider--client-role-client--role-name=client-access" \
+  "--spi-restrict-client-auth-access-provider--client-role--client-role-name=client-access" \
 ]
