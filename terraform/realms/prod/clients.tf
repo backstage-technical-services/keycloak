@@ -36,7 +36,6 @@ module "wiki_client" {
   realm           = module.realm
   client_id       = "wiki"
   name            = "Wiki"
-  restrict_access = true
 
   enabled_flows = {
     authorization_code = true
@@ -57,7 +56,6 @@ module "nextcloud_client" {
   realm           = module.realm
   client_id       = "nextcloud"
   name            = "Nextcloud"
-  restrict_access = true
 
   enabled_flows = {
     authorization_code = true
