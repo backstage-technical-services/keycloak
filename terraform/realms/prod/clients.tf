@@ -33,9 +33,9 @@ module "website_v4_client" {
 module "wiki_client" {
   source = "../../modules/oidc-client"
 
-  realm           = module.realm
-  client_id       = "wiki"
-  name            = "Wiki"
+  realm     = module.realm
+  client_id = "wiki"
+  name      = "Wiki"
 
   enabled_flows = {
     authorization_code = true
@@ -53,9 +53,9 @@ module "wiki_client" {
 module "nextcloud_client" {
   source = "../../modules/oidc-client"
 
-  realm           = module.realm
-  client_id       = "nextcloud"
-  name            = "Nextcloud"
+  realm     = module.realm
+  client_id = "nextcloud"
+  name      = "Nextcloud"
 
   enabled_flows = {
     authorization_code = true
