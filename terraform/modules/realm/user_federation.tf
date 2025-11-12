@@ -1,5 +1,5 @@
-data "aws_ssm_parameter" "ldap_admin_password" {
-  name = "/backstage/openldap/admin-password"
+data "aws_ssm_parameter" "openldap_secrets" {
+  name = "/backstage/openldap/secrets"
 }
 
 resource "keycloak_ldap_user_federation" "default" {
@@ -9,15 +9,16 @@ resource "keycloak_ldap_user_federation" "default" {
 
   connection_url  = "ldap://openldap:1389"
   bind_dn         = "cn=admin,dc=ldap,dc=bts-crew,dc=com"
-  bind_credential = data.aws_ssm_parameter.ldap_admin_password.value
+  bind_credential = jsondecode(data.aws_ssm_parameter.openldap_secrets.value)["adminPassword"]
 
   edit_mode                 = "WRITABLE"
-  users_dn                  = "dc=ldap,dc=bts-crew,dc=com"
+  users_dn                  = "ou=users,dc=ldap,dc=bts-crew,dc=com"
   username_ldap_attribute   = "uid"
   rdn_ldap_attribute        = "uid"
   uuid_ldap_attribute       = "entryUUID"
   user_object_classes       = ["inetOrgPerson"]
   custom_user_search_filter = "(&(uid=*))"
+  search_scope              = "SUBTREE"
 
   import_enabled           = true
   sync_registrations       = true
