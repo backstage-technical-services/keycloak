@@ -30,6 +30,31 @@ resource "keycloak_ldap_user_federation" "default" {
   }
 }
 
+resource "keycloak_group" "ldap" {
+  realm_id = keycloak_realm.default.id
+  name     = "LDAP"
+}
+
+resource "keycloak_ldap_group_mapper" "default" {
+  realm_id                = keycloak_realm.default.id
+  ldap_user_federation_id = keycloak_ldap_user_federation.default.id
+
+  name                           = "group-mapper"
+  ldap_groups_dn                 = "ou=groups,dc=ldap,dc=bts-crew,dc=com"
+  group_name_ldap_attribute      = "cn"
+  group_object_classes           = ["posixGroup"]
+  membership_ldap_attribute      = "memberUid"
+  membership_attribute_type      = "UID"
+  membership_user_ldap_attribute = "uid"
+  mode                           = var.federation_readonly ? "READ_ONLY" : "LDAP_ONLY"
+  memberof_ldap_attribute        = "memberOf"
+  mapped_group_attributes        = ["gidNumber"]
+
+  preserve_group_inheritance           = false
+  drop_non_existing_groups_during_sync = !var.federation_readonly
+  groups_path                          = "/${keycloak_group.ldap.name}"
+}
+
 resource "keycloak_ldap_user_attribute_mapper" "first_name_given_name" {
   realm_id                = keycloak_realm.default.id
   ldap_user_federation_id = keycloak_ldap_user_federation.default.id
