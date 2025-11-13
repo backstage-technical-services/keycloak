@@ -17,6 +17,9 @@ variable "use_custom_auth_flows" {
   type    = bool
   default = true
 }
+variable "federation_readonly" {
+  type = bool
+}
 
 // Token config
 variable "access_token_lifespan" {

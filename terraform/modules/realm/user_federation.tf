@@ -11,7 +11,7 @@ resource "keycloak_ldap_user_federation" "default" {
   bind_dn         = "cn=admin,dc=ldap,dc=bts-crew,dc=com"
   bind_credential = jsondecode(data.aws_ssm_parameter.openldap_secrets.value)["adminPassword"]
 
-  edit_mode                 = "WRITABLE"
+  edit_mode                 = var.federation_readonly ? "READ_ONLY" : "WRITABLE"
   users_dn                  = "ou=users,dc=ldap,dc=bts-crew,dc=com"
   username_ldap_attribute   = "uid"
   rdn_ldap_attribute        = "uid"
@@ -22,7 +22,7 @@ resource "keycloak_ldap_user_federation" "default" {
 
   import_enabled           = true
   sync_registrations       = true
-  validate_password_policy = true
+  validate_password_policy = !var.federation_readonly
   trust_email              = true
 
   cache {

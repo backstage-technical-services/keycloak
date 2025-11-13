@@ -14,5 +14,6 @@ module "realm" {
   name         = "nonprod"
   display_name = "Backstage (NonProd)"
 
+  federation_readonly   = true
   access_token_lifespan = "8h"
 }
