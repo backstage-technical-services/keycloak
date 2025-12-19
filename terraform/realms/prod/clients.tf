@@ -69,3 +69,24 @@ module "nextcloud_client" {
     "https://nextcloud.bts-crew.com/*",
   ]
 }
+
+module "incus_client" {
+  source = "../../modules/oidc-client"
+
+  realm     = module.realm
+  client_id = "incus"
+  name      = "Incus UI"
+  restrict_access = true
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  redirect_urls = [
+    "https://incus-admin.su.bath.ac.uk/*",
+  ]
+  logout_redirect_urls = [
+    "https://incus-admin.su.bath.ac.uk/*",
+  ]
+}
