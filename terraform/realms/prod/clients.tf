@@ -73,9 +73,9 @@ module "nextcloud_client" {
 module "incus_client" {
   source = "../../modules/oidc-client"
 
-  realm     = module.realm
-  client_id = "incus"
-  name      = "Incus UI"
+  realm           = module.realm
+  client_id       = "incus"
+  name            = "Incus UI"
   restrict_access = true
 
   enabled_flows = {
