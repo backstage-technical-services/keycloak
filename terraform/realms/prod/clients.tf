@@ -104,9 +104,15 @@ module "grafana_client" {
   }
 
   client_roles = [
-    "grafana_globaladmin",
-    "grafana_admin",
-    "grafana_editor",
+    {
+      name = "grafana_globaladmin"
+    },
+    {
+      name = "grafana_admin"
+    },
+    {
+      name = "grafana_editor"
+    },
   ]
 
   redirect_urls = [
