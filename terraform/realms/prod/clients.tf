@@ -103,6 +103,12 @@ module "grafana_client" {
     client_credentials = true
   }
 
+  client_roles = [
+    "grafana_globaladmin",
+    "grafana_admin",
+    "grafana_editor",
+  ]
+
   redirect_urls = [
     "https://bts-metrics.su.bath.ac.uk/*",
   ]
