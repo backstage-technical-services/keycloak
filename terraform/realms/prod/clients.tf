@@ -90,3 +90,23 @@ module "incus_client" {
     "https://incus-admin.su.bath.ac.uk/*",
   ]
 }
+
+module "grafana_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "grafana"
+  name            = "Grafana"
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  redirect_urls = [
+    "https://bts-metrics.su.bath.ac.uk/*",
+  ]
+  logout_redirect_urls = [
+    "https://bts-metrics.su.bath.ac.uk/*",
+  ]
+}
