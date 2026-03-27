@@ -94,9 +94,9 @@ module "incus_client" {
 module "grafana_client" {
   source = "../../modules/oidc-client"
 
-  realm           = module.realm
-  client_id       = "grafana"
-  name            = "Grafana"
+  realm     = module.realm
+  client_id = "grafana"
+  name      = "Grafana"
 
   enabled_flows = {
     authorization_code = true
