@@ -1,5 +1,7 @@
 *
 !theme/*
+!patches/
+!patches/**
 theme/.storybook/
 theme/node_modules/
 theme/dist/

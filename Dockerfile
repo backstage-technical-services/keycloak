@@ -39,9 +39,12 @@ RUN apt-get update -y \
 
 WORKDIR /opt
 
+COPY patches/keycloak-cas/preserve-wae-response.patch /tmp/keycloak-cas-preserve-wae-response.patch
+
 RUN git clone https://github.com/RoboJackets/keycloak-cas.git \
     && cd keycloak-cas \
     && git checkout d397dfae68fc163d5e056378f434d7efdda8ed8f \
+    && git apply /tmp/keycloak-cas-preserve-wae-response.patch \
     && mvn package
 
 FROM quay.io/keycloak/keycloak:${KC_VERSION} AS builder
