@@ -82,6 +82,13 @@ module "incus_client" {
     authorization_code = true
     client_credentials = true
   }
+
+  redirect_urls = [
+    "https://incus-admin.su.bath.ac.uk/*",
+  ]
+  logout_redirect_urls = [
+    "https://incus-admin.su.bath.ac.uk/*",
+  ]
 }
 
 module "pat_client" {
@@ -90,16 +97,18 @@ module "pat_client" {
   realm           = module.realm
   client_id       = "pat"
   name            = "PAT"
+  restrict_access = true
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
     
   redirect_urls = [
     "https://assets.bts-crew.com/*",
   ]
   logout_redirect_urls = [
     "https://assets.bts-crew.com/*",
-    "https://incus-admin.su.bath.ac.uk/*",
-  ]
-  logout_redirect_urls = [
-    "https://incus-admin.su.bath.ac.uk/*",
   ]
 }
 
