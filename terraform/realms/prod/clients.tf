@@ -91,6 +91,27 @@ module "incus_client" {
   ]
 }
 
+module "pat_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "pat"
+  name            = "PAT"
+  restrict_access = true
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  redirect_urls = [
+    "https://assets.bts-crew.com/*",
+  ]
+  logout_redirect_urls = [
+    "https://assets.bts-crew.com/*",
+  ]
+}
+
 module "grafana_client" {
   source = "../../modules/oidc-client"
 
