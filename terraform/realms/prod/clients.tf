@@ -103,7 +103,7 @@ module "pat_client" {
     authorization_code = true
     client_credentials = true
   }
-    
+
   redirect_urls = [
     "https://assets.bts-crew.com/*",
   ]
