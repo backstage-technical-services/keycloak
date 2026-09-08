@@ -33,10 +33,9 @@ module "website_v4_client" {
 module "wiki_client" {
   source = "../../modules/oidc-client"
 
-  realm           = module.realm
-  client_id       = "wiki"
-  name            = "Wiki"
-  restrict_access = true
+  realm     = module.realm
+  client_id = "wiki"
+  name      = "Wiki"
 
   enabled_flows = {
     authorization_code = true
@@ -51,14 +50,12 @@ module "wiki_client" {
   ]
 }
 
-
-module "pat_client" {
+module "nextcloud_client" {
   source = "../../modules/oidc-client"
 
-  realm           = module.realm
-  client_id       = "pat"
-  name            = "PAT"
-  restrict_access = true
+  realm     = module.realm
+  client_id = "nextcloud"
+  name      = "Nextcloud"
 
   enabled_flows = {
     authorization_code = true
@@ -66,9 +63,74 @@ module "pat_client" {
   }
 
   redirect_urls = [
+    "https://nextcloud.bts-crew.com/*",
+  ]
+  logout_redirect_urls = [
+    "https://nextcloud.bts-crew.com/*",
+  ]
+}
+
+module "incus_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "incus"
+  name            = "Incus UI"
+  restrict_access = true
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+}
+
+module "pat_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "pat"
+  name            = "PAT"
+    
+  redirect_urls = [
     "https://assets.bts-crew.com/*",
   ]
   logout_redirect_urls = [
     "https://assets.bts-crew.com/*",
+    "https://incus-admin.su.bath.ac.uk/*",
+  ]
+  logout_redirect_urls = [
+    "https://incus-admin.su.bath.ac.uk/*",
+  ]
+}
+
+module "grafana_client" {
+  source = "../../modules/oidc-client"
+
+  realm     = module.realm
+  client_id = "grafana"
+  name      = "Grafana"
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  client_roles = [
+    {
+      name = "grafana_globaladmin"
+    },
+    {
+      name = "grafana_admin"
+    },
+    {
+      name = "grafana_editor"
+    },
+  ]
+
+  redirect_urls = [
+    "https://bts-metrics.su.bath.ac.uk/*",
+  ]
+  logout_redirect_urls = [
+    "https://bts-metrics.su.bath.ac.uk/*",
   ]
 }
