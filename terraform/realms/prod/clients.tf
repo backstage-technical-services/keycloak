@@ -1,10 +1,9 @@
 module "website_v4_client" {
   source = "../../modules/oidc-client"
 
-  realm           = module.realm
-  client_id       = "website-v4"
-  name            = "Website v4 SPA"
-  restrict_access = true
+  realm     = module.realm
+  client_id = "website-v4"
+  name      = "Website v4 SPA"
 
   enabled_flows = {
     authorization_code = true
