@@ -142,3 +142,23 @@ module "grafana_client" {
     "https://bts-metrics.su.bath.ac.uk/*",
   ]
 }
+
+module "dress_notes_client" {
+  source = "../../modules/oidc-client"
+
+  realm           = module.realm
+  client_id       = "dress_notes"
+  name            = "Dress Notes"
+
+  enabled_flows = {
+    authorization_code = true
+    client_credentials = true
+  }
+
+  redirect_urls = [
+    "https://bts-dressnotes.su.bath.ac.uk/*",
+  ]
+  logout_redirect_urls = [
+    "https://bts-dressnotes.su.bath.ac.uk/*",
+  ]
+}
