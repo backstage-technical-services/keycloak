@@ -146,9 +146,9 @@ module "grafana_client" {
 module "dress_notes_client" {
   source = "../../modules/oidc-client"
 
-  realm = module.realm
+  realm     = module.realm
   client_id = "dress_notes"
-  name = "Dress Notes"
+  name      = "Dress Notes"
 
   enabled_flows = {
     authorization_code = true
