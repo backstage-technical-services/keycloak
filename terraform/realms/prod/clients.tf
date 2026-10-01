@@ -156,7 +156,6 @@ module "dress_notes_client" {
   }
 
   redirect_urls = [
-    "http://bts-dressnotes.su.bath.ac.uk/*",
     "https://bts-dressnotes.su.bath.ac.uk/*",
   ]
   logout_redirect_urls = [
