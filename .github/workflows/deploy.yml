@@ -28,15 +28,15 @@ jobs:
         include: ${{ fromJSON(vars.MULTI_PLATFORM_MATRIX) }}
     steps:
       - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: eu-west-1
           role-to-assume: ${{ vars.IMAGE_PUSH_ROLE_ARN }}
       - uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: true
           file: Dockerfile
@@ -55,7 +55,7 @@ jobs:
     needs: [push-image]
     steps:
       - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: eu-west-1
           role-to-assume: ${{ vars.IMAGE_PUSH_ROLE_ARN }}
@@ -74,7 +74,7 @@ jobs:
     needs: [manifest]
     steps:
       - run: echo "IMAGE_TAG=${KC_VERSION}-${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/helm-deploy
         with:
           k8s-url: ${{ vars.K8S_SERVER_URL }}

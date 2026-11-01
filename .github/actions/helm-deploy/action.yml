@@ -15,13 +15,13 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: azure/setup-kubectl@v4
-    - uses: azure/k8s-set-context@v4
+    - uses: azure/setup-kubectl@v5
+    - uses: azure/k8s-set-context@v5
       with:
         method: service-account
         k8s-url: ${{ inputs.k8s-url }}
         k8s-secret: ${{ inputs.k8s-secret }}
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
     - name: deploy
       shell: bash
       run: |

@@ -16,14 +16,14 @@ jobs:
     name: Validate chart
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           sparse-checkout: |
             .github
             chart
-      - uses: azure/setup-helm@v4
-      - uses: actions/setup-go@v5
+      - uses: azure/setup-helm@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: 1.22
       - run: go install github.com/yannh/kubeconform/cmd/kubeconform@v0.6.7
@@ -51,7 +51,7 @@ jobs:
           run: echo "${{ steps.template.outputs.stdout }}" | kubeconform -summary -ignore-missing-schemas
       - name: post comment
         if: always()
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
             # helm chart
@@ -83,5 +83,5 @@ jobs:
             ${{ steps.validate.outputs.stderr }}
             ```
             </details>
-          comment_tag: chart-${{ matrix.environment }}
+          comment-tag: chart-${{ matrix.environment }}
           mode: upsert
