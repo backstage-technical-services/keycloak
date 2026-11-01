@@ -1,0 +1,68 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/tests.yml'
+      - 'patches/**'
+      - 'terraform/**'
+      - 'test-suite/**'
+      - 'theme/**/*'
+      - 'Dockerfile'
+      - 'docker-compose.yaml'
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: yarn --cwd test-suite install --frozen-lockfile
+      - name: Set up Terraform
+        working-directory: terraform/realms/prod
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          bash <(curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/release/install.sh) -b $HOME/.local/bin
+          tfswitch -b $HOME/.local/bin/terraform
+      - name: Set up test environment
+        run: yarn --cwd test-suite setup
+      - name: Run tests
+        run: yarn --cwd test-suite test
+      - name: Print compose logs on failure
+        if: failure()
+        env:
+          COMPOSE_FILE: docker-compose.yaml:test-suite/docker-compose.yaml
+        run: docker compose logs --no-color || true
+      - name: Tear down
+        if: always()
+        run: yarn --cwd test-suite cleanup
+      - if: always()
+        uses: ctrf-io/github-test-reporter@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          report-path: './test-suite/ctrf/*.json'
+          title: E2E tests
+          pull-request: true
+          use-suite-name: true
+          collapse-large-reports: true
+          group-by: suite
+          always-group-by: true
+          overwrite-comment: true
+          always-latest-comment: true
+          comment-tag: ctrf-test-report

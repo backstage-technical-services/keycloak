@@ -1,0 +1,57 @@
+# Overlay on the root docker-compose.yaml for the E2E test stack, used via
+# COMPOSE_FILE=docker-compose.yaml:test-suite/docker-compose.yaml (see bin/setup.sh).
+# Relative paths resolve from the repo root, as that's where the first compose file is.
+services:
+  mail:
+    container_name: bts-keycloak-mail
+    image: djfarrelly/maildev
+    networks:
+      - main
+    restart: on-failure
+
+  floci:
+    container_name: bts-keycloak-floci
+    image: floci/floci:latest-compat
+    networks:
+      - main
+    ports:
+      - '4566:4566'
+    environment:
+      AWS_DEFAULT_REGION: eu-west-1
+      FLOCI_INIT_HOOKS_TIMEOUT_SECONDS: '120'
+      FLOCI_INIT_HOOKS_SHELL_EXECUTABLE: /bin/bash
+    volumes:
+      - ./test-suite/init/floci:/etc/floci/init/ready.d:ro
+    restart: on-failure
+
+  openldap:
+    container_name: bts-keycloak-openldap
+    image: bitnamilegacy/openldap:2.6.10
+    networks:
+      - main
+    environment:
+      LDAP_ROOT: dc=ldap,dc=bts-crew,dc=com
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_SKIP_DEFAULT_TREE: 'yes'
+      LDAP_CUSTOM_LDIF_DIR: /ldifs
+    volumes:
+      - ./test-suite/init/openldap:/ldifs:ro
+    healthcheck:
+      test: [ 'CMD-SHELL', 'ldapsearch -x -H ldap://localhost:1389 -D cn=admin,dc=ldap,dc=bts-crew,dc=com -w admin -b ou=users,dc=ldap,dc=bts-crew,dc=com uid=ldap_user | grep -q "numEntries: 1"' ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: on-failure
+
+  keycloak:
+    environment:
+      KC_BOOTSTRAP_ADMIN_CLIENT_ID: test
+      KC_BOOTSTRAP_ADMIN_CLIENT_SECRET: test
+    depends_on:
+      mail:
+        condition: service_started
+      floci:
+        condition: service_healthy
+      openldap:
+        condition: service_healthy

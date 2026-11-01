@@ -1,0 +1,8 @@
+dn: uid=ldap_user,ou=users,dc=ldap,dc=bts-crew,dc=com
+objectClass: inetOrgPerson
+uid: ldap_user
+cn: LDAP
+givenName: LDAP
+sn: User
+mail: ldap_user@example.invalid
+userPassword: ldap_password

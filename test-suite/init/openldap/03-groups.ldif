@@ -1,0 +1,5 @@
+dn: cn=crew,ou=groups,dc=ldap,dc=bts-crew,dc=com
+objectClass: posixGroup
+cn: crew
+gidNumber: 2001
+memberUid: ldap_user
