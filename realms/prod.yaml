@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=../schemas/realm.json
+display-name: Backstage
+
+tokens:
+  access-lifespan: 5m
+
+federation:
+  read-only: false
+
+clients:
+  - name: website-v4
+    display-name: Website v4 SPA
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://bts-crew.com/auth/callback
+      - https://www.bts-crew.com/auth/callback
+    logout-redirect-urls:
+      - https://bts-crew.com
+      - https://www.bts-crew.com
+    service-account-roles:
+      - client: realm-management
+        name: manage-users
+      - client: realm-management
+        name: query-clients
+      - client: realm-management
+        name: view-clients
+
+  - name: wiki
+    display-name: Wiki
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://wiki.bts-crew.com/*
+    logout-redirect-urls:
+      - https://wiki.bts-crew.com/*
+
+  - name: nextcloud
+    display-name: Nextcloud
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://nextcloud.bts-crew.com/*
+    logout-redirect-urls:
+      - https://nextcloud.bts-crew.com/*
+
+  - name: incus
+    display-name: Incus UI
+    access-mode: restricted
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://incus-admin.su.bath.ac.uk/*
+    logout-redirect-urls:
+      - https://incus-admin.su.bath.ac.uk/*
+
+  - name: pat
+    display-name: PAT
+    access-mode: restricted
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://assets.bts-crew.com/*
+    logout-redirect-urls:
+      - https://assets.bts-crew.com/*
+
+  - name: grafana
+    display-name: Grafana
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://bts-metrics.su.bath.ac.uk/*
+    logout-redirect-urls:
+      - https://bts-metrics.su.bath.ac.uk/*
+    roles:
+      - name: grafana_globaladmin
+      - name: grafana_admin
+      - name: grafana_editor
+
+  - name: dress-notes
+    display-name: Dress Notes
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://bts-dressnotes.su.bath.ac.uk/*
+    logout-redirect-urls:
+      - https://bts-dressnotes.su.bath.ac.uk/*
+
+groups:
+  - name: Committee
+    roles:
+      - client: realm-management
+        name: manage-users
+      - client: realm-management
+        name: query-clients
+      - client: realm-management
+        name: query-groups
+      - client: realm-management
+        name: query-realms
+      - client: realm-management
+        name: query-users
+      - client: realm-management
+        name: view-authorization
+      - client: realm-management
+        name: view-clients
+      - client: realm-management
+        name: view-events
+      - client: realm-management
+        name: view-identity-providers
+      - client: realm-management
+        name: view-realm
+      - client: realm-management
+        name: view-users

@@ -1,12 +1,8 @@
-data "aws_ssm_parameter" "smtp_credentials" {
-  name = "/backstage/keycloak/smtp-credentials"
-}
-
 resource "keycloak_realm" "default" {
   realm             = var.name
-  display_name      = var.display_name
+  display_name      = var.config["display-name"]
   display_name_html = "<img src=\"https://bts-crew.com/images/bts-logo.png\">"
-  ssl_required      = "external"
+  ssl_required      = var.ssl_required
 
   # Themes
   login_theme = "bts-keycloak-theme"
@@ -23,7 +19,7 @@ resource "keycloak_realm" "default" {
   password_policy = "notUsername and notEmail and notContainsUsername and passwordHistory(3) and length(5)"
 
   # Sessions
-  access_token_lifespan                = var.access_token_lifespan
+  access_token_lifespan                = var.config.tokens.access-lifespan
   sso_session_idle_timeout             = "${7 * 24}h"
   sso_session_max_lifespan             = "${14 * 24}h"
   sso_session_idle_timeout_remember_me = "${30 * 24}h"
@@ -54,18 +50,22 @@ resource "keycloak_realm" "default" {
 
   # SMTP
   smtp_server {
-    host     = "smtp.gmail.com"
-    port     = 587
-    starttls = true
+    host     = var.smtp.host
+    port     = var.smtp.port
+    starttls = var.smtp.starttls
 
     from                  = "no-reply@bts-crew.com"
     from_display_name     = "Backstage Auth"
     reply_to              = "sec@bts-crew.com"
     reply_to_display_name = "Backstage Secretary"
 
-    auth {
-      username = jsondecode(data.aws_ssm_parameter.smtp_credentials.value)["username"]
-      password = jsondecode(data.aws_ssm_parameter.smtp_credentials.value)["password"]
+    dynamic "auth" {
+      for_each = var.smtp.username != null && var.smtp.password != null ? [1] : []
+
+      content {
+        username = var.smtp.username
+        password = var.smtp.password
+      }
     }
   }
 }
@@ -82,7 +82,7 @@ resource "keycloak_realm_events" "default" {
 }
 
 resource "keycloak_authentication_bindings" "default" {
-  count = var.use_custom_auth_flows ? 1 : 0
+  count = var.config.auth.enable-flows ? 1 : 0
 
   realm_id     = keycloak_realm.default.id
   browser_flow = keycloak_authentication_flow.browser.alias

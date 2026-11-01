@@ -16,8 +16,8 @@ resource "keycloak_oidc_google_identity_provider" "alumni" {
   sync_mode     = "IMPORT"
   hosted_domain = "bath.edu"
 
-  first_broker_login_flow_alias = var.use_custom_auth_flows ? keycloak_authentication_flow.broker.alias : ""
-  post_broker_login_flow_alias  = var.use_custom_auth_flows ? keycloak_authentication_flow.idp_post_login.alias : ""
+  first_broker_login_flow_alias = var.config.auth.enable-flows ? keycloak_authentication_flow.broker.alias : ""
+  post_broker_login_flow_alias  = var.config.auth.enable-flows ? keycloak_authentication_flow.idp_post_login.alias : ""
 }
 
 #########################################################################################################################
@@ -38,6 +38,6 @@ resource "keycloak_oidc_identity_provider" "cas" {
     casServerUrlPrefix = "https://auth.bath.ac.uk"
   }
 
-  first_broker_login_flow_alias = var.use_custom_auth_flows ? keycloak_authentication_flow.cas.alias : ""
-  post_broker_login_flow_alias  = var.use_custom_auth_flows ? keycloak_authentication_flow.idp_post_login.alias : ""
+  first_broker_login_flow_alias = var.config.auth.enable-flows ? keycloak_authentication_flow.cas.alias : ""
+  post_broker_login_flow_alias  = var.config.auth.enable-flows ? keycloak_authentication_flow.idp_post_login.alias : ""
 }

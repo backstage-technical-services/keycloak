@@ -2,7 +2,7 @@ terraform {
   required_providers {
     keycloak = {
       source  = "keycloak/keycloak"
-      version = ">= 4.0.0"
+      version = ">= 5.0.0"
     }
   }
 }
@@ -27,18 +27,18 @@ variable "public" {
   description = "When enabled the client type will be `public`, otherwise the type will be `confidential`."
   default     = false
 }
-variable "restrict_access" {
-  type        = bool
-  description = "When enabled, users will need to be given the `client-access` client role in order to be able to use/access this client."
-  default     = false
+variable "access_mode" {
+  type        = string
+  description = "When anything other than `open`, users will need to be given the `client-access` client role in order to be able to use/access this client."
+  default     = "open"
 }
 variable "enabled_flows" {
   type = object({
-    authorization_code                  = optional(bool, false)
-    implicit                            = optional(bool, false)
-    client_credentials                  = optional(bool, false)
-    resource_owner_password_credentials = optional(bool, false)
-    oauth_device_authorization          = optional(bool, false)
+    standard                   = optional(bool, false)
+    implicit                   = optional(bool, false)
+    client_credentials         = optional(bool, false)
+    direct_access_grants       = optional(bool, false)
+    oauth_device_authorization = optional(bool, false)
   })
   description = "The authentication flows that should be enabled."
   default     = {}
@@ -62,9 +62,4 @@ variable "client_roles" {
   }))
   description = "Any roles to create for this specific client."
   default     = []
-}
-variable "service_account_roles" {
-  type        = map(list(string))
-  description = "Any roles to attach to the client's service account; the key is the client ID and the value is the list of roles. Requires the `client_credentials` flow."
-  default     = {}
 }

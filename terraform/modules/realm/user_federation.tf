@@ -11,7 +11,7 @@ resource "keycloak_ldap_user_federation" "default" {
   bind_dn         = "cn=admin,dc=ldap,dc=bts-crew,dc=com"
   bind_credential = jsondecode(data.aws_ssm_parameter.openldap_secrets.value)["adminPassword"]
 
-  edit_mode                 = var.federation_readonly ? "READ_ONLY" : "WRITABLE"
+  edit_mode                 = var.config.federation.read-only ? "READ_ONLY" : "WRITABLE"
   users_dn                  = "ou=users,dc=ldap,dc=bts-crew,dc=com"
   username_ldap_attribute   = "uid"
   rdn_ldap_attribute        = "uid"
@@ -22,7 +22,7 @@ resource "keycloak_ldap_user_federation" "default" {
 
   import_enabled           = true
   sync_registrations       = true
-  validate_password_policy = !var.federation_readonly
+  validate_password_policy = !var.config.federation.read-only
   trust_email              = true
 
   cache {
@@ -46,12 +46,12 @@ resource "keycloak_ldap_group_mapper" "default" {
   membership_ldap_attribute      = "memberUid"
   membership_attribute_type      = "UID"
   membership_user_ldap_attribute = "uid"
-  mode                           = var.federation_readonly ? "READ_ONLY" : "LDAP_ONLY"
+  mode                           = var.config.federation.read-only ? "READ_ONLY" : "LDAP_ONLY"
   memberof_ldap_attribute        = "memberOf"
   mapped_group_attributes        = ["gidNumber"]
 
   preserve_group_inheritance           = false
-  drop_non_existing_groups_during_sync = !var.federation_readonly
+  drop_non_existing_groups_during_sync = !var.config.federation.read-only
   groups_path                          = "/${keycloak_group.ldap.name}"
 }
 
