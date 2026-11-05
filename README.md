@@ -3,6 +3,9 @@
 The Keycloak image (with the BTS login theme and extensions), its Helm chart, and the Terraform that configures the
 `prod` and `nonprod` realms.
 
+## Managing Issues
+[Issues and features should be made atomic into an issue, and the lifecycles of said issues should be tracked with the project tracker.](https://github.com/orgs/backstage-technical-services/projects/7/)
+
 ## Configuring a realm
 
 Each realm is configured by a YAML file in [`realms/`](realms):
