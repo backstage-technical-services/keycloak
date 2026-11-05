@@ -1,0 +1,13 @@
+dn: dc=ldap,dc=bts-crew,dc=com
+objectClass: dcObject
+objectClass: organization
+dc: ldap
+o: example
+
+dn: ou=users,dc=ldap,dc=bts-crew,dc=com
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=ldap,dc=bts-crew,dc=com
+objectClass: organizationalUnit
+ou: groups

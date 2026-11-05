@@ -1,0 +1,4 @@
+/ctrf/
+/.terraform/
+node_modules/
+*.log

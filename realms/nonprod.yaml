@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=../schemas/realm.json
+display-name: Backstage (NonProd)
+
+tokens:
+  access-lifespan: 8h
+
+federation:
+  read-only: true
+
+clients:
+  - name: website-v4
+    display-name: Website v4 SPA
+    auth-flows:
+      standard: true
+      client-credentials: true
+    redirect-urls:
+      - https://staging.bts-crew.com/auth/callback
+      - http://localhost:8080/auth/callback
+    logout-redirect-urls:
+      - https://staging.bts-crew.com
+      - http://localhost:8080
+    service-account-roles:
+      - client: realm-management
+        name: manage-users
+      - client: realm-management
+        name: query-clients
+      - client: realm-management
+        name: view-clients
+
+groups:
+  - name: Committee
+    roles:
+      - client: realm-management
+        name: manage-users
+      - client: realm-management
+        name: query-clients
+      - client: realm-management
+        name: query-groups
+      - client: realm-management
+        name: query-realms
+      - client: realm-management
+        name: query-users
+      - client: realm-management
+        name: view-authorization
+      - client: realm-management
+        name: view-clients
+      - client: realm-management
+        name: view-events
+      - client: realm-management
+        name: view-identity-providers
+      - client: realm-management
+        name: view-realm
+      - client: realm-management
+        name: view-users

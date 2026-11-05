@@ -3,17 +3,25 @@ locals {
     managed-by = "Terraform"
     owner      = "backstage"
     repo       = "backstage/keycloak"
-    realm      = try(regex("[^/]+$", path.cwd), "unknown")
+    realm      = "nonprod"
   }
 }
 
+data "aws_ssm_parameter" "smtp_credentials" {
+  name = "/backstage/keycloak/smtp-credentials"
+}
 
 module "realm" {
   source = "../../modules/realm"
 
-  name         = "nonprod"
-  display_name = "Backstage (NonProd)"
+  name   = "nonprod"
+  config = yamldecode(file("${path.module}/../../../realms/nonprod.yaml"))
 
-  federation_readonly   = true
-  access_token_lifespan = "8h"
+  smtp = {
+    host     = "smtp.gmail.com"
+    port     = 587
+    starttls = true
+    username = jsondecode(data.aws_ssm_parameter.smtp_credentials.value)["username"]
+    password = jsondecode(data.aws_ssm_parameter.smtp_credentials.value)["password"]
+  }
 }

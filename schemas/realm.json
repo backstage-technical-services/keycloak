@@ -1,0 +1,191 @@
+{
+  "$id": "https://github.com/backstage-technical-services/keycloak/schemas/realm.json",
+  "title": "Keycloak realm configuration",
+  "description": "Used to validate the realm YAML files in realms/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["display-name", "tokens"],
+  "properties": {
+    "display-name": {
+      "type": "string",
+      "description": "The name of the realm shown to users."
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["access-lifespan"],
+      "properties": {
+        "access-lifespan": {
+          "type": "string",
+          "description": "How long access tokens are valid for, as a Go duration (eg 5m, 8h).",
+          "pattern": "^([0-9]+(ns|us|µs|ms|s|m|h))+$"
+        }
+      }
+    },
+    "default-access-mode": {
+      "$ref": "#/definitions/accessMode",
+      "description": "The access-mode used by clients that don't specify one. Defaults to open."
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enable-flows": {
+          "type": "boolean",
+          "description": "Whether to bind the custom BTS authentication flows. Defaults to true."
+        }
+      }
+    },
+    "federation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read-only": {
+          "type": "boolean",
+          "description": "Whether the LDAP user federation is read-only. Defaults to false."
+        }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "not": {
+              "enum": ["open", "restricted", "LDAP"]
+            },
+            "description": "The name of the group. open and restricted are reserved for access-mode, and LDAP is created by the realm module."
+          },
+          "roles": {
+            "type": "array",
+            "description": "Roles to grant members of this group.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "client": {
+                  "type": "string",
+                  "description": "The client the role belongs to (eg realm-management, or a client in this file). Omit for a realm role."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "clients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The client ID."
+          },
+          "display-name": {
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean",
+            "description": "Whether the client is public (no client secret). Defaults to false."
+          },
+          "access-mode": {
+            "$ref": "#/definitions/accessMode"
+          },
+          "auth-flows": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "standard": {
+                "type": "boolean",
+                "description": "Authorization code flow."
+              },
+              "implicit": {
+                "type": "boolean"
+              },
+              "client-credentials": {
+                "type": "boolean",
+                "description": "Enables the client's service account."
+              },
+              "direct-access-grants": {
+                "type": "boolean",
+                "description": "Resource owner password credentials flow."
+              },
+              "oauth-device-authorization": {
+                "type": "boolean"
+              }
+            }
+          },
+          "redirect-urls": {
+            "type": "array",
+            "description": "The URL patterns that browsers can redirect to after logging in.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logout-redirect-urls": {
+            "type": "array",
+            "description": "The URL patterns that browsers can redirect to after logging out.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roles": {
+            "type": "array",
+            "description": "Roles to create on this client.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "not": {
+                    "const": "client-access"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "service-account-roles": {
+            "type": "array",
+            "description": "Client roles to grant the client's service account. Requires the client-credentials flow.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["client", "name"],
+              "properties": {
+                "client": {
+                  "type": "string",
+                  "description": "The client the role belongs to (eg realm-management, or a client in this file)."
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "accessMode": {
+      "type": "string",
+      "description": "open: anyone can log in. restricted: users need the client's client-access role. A group name: as restricted, and members of that group are given client-access."
+    }
+  }
+}

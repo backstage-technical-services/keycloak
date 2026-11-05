@@ -11,15 +11,19 @@ variable "realm" {
   type = object({
     id = string
   })
-  description = "The realm the client will be created in."
+  description = "The realm the group will be created in."
 }
 variable "name" {
   type        = string
-  description = "An optional human-friendly name of the client."
-  default     = null
+  description = "The name of the group."
+}
+variable "realm_roles" {
+  type        = list(string)
+  description = "The names of any realm roles to attach to the group."
+  default     = []
 }
 variable "client_roles" {
-  type        = map(list(string))
-  description = "Any client roles to attach to the group; the key is the client ID and the value is the list of roles."
-  default     = {}
+  type        = list(string)
+  description = "The IDs of any client roles to attach to the group."
+  default     = []
 }

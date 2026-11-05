@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Outputs a JSON array of the realms (terraform/realms/<realm>) affected by the changes between BASE_SHA and HEAD_SHA.
+#
+#   realms/<realm>.yaml            -> <realm>
+#   terraform/realms/<realm>/**    -> <realm>
+#   terraform/modules/**, schemas/** -> every realm
 
 set -o errexit
 set -o pipefail
@@ -18,61 +23,44 @@ function log() {
 [ -z "${HEAD_SHA:-}" ] && log FATAL "HEAD_SHA environment variable is required"
 [ -z "${BASE_SHA:-}" ] && log FATAL "BASE_SHA environment variable is required"
 
-readarray -t changed_paths < <(git diff --no-renames --name-only --merge-base "${BASE_SHA}" "${HEAD_SHA}" -- | xargs -r dirname | sort -u)
+readarray -t all_realms < <(find terraform/realms -mindepth 2 -maxdepth 2 -name .terraform.lock.hcl -exec dirname {} \; | xargs -r -n1 basename | sort)
+readarray -t changed_files < <(git diff --no-renames --name-only --merge-base "${BASE_SHA}" "${HEAD_SHA}" --)
 
-# translate any modules into their usages
-for i in "${!changed_paths[@]}"; do
-    path="${changed_paths[$i]}"
-    if [[ "${path}" == terraform/modules/* ]]; then
-      module_path_prefix="$(echo "${path}" | sed -E 's#^terraform/(modules/[^\/]+).*#\1#')"
-
-      readarray -t module_usages < <(echo $(grep -r -i -l --include "*.tf" "${module_path_prefix}" terraform/realms || true) | xargs -r dirname | sort -u)
-
-      if [[ ${#module_usages[@]} -gt 0 ]]; then
-        log INFO "replacing '${path}' with '${module_usages[@]}'"
-        changed_paths+=("${module_usages[@]}")
-      else
-        log INFO "ignoring changes in '${path}' - component is unused"
-      fi
-
-      unset 'changed_paths[i]'
-    fi
-done
-
-# iterate through all paths and find those which are realm roots
-declare -t pruned_changed_paths=()
-for path in "${changed_paths[@]}"; do
-  if [[ "${path}" == terraform/realms/* ]]; then
-    if [[ -f "${path}/.terraform.lock.hcl" ]]; then
-      pruned_changed_paths+=("${path}")
-    else
-      path_parts=($(echo "$path" | tr '/' '\n'))
-      path_new=""
-      for path_part in "${path_parts[@]}"; do
-        path_new="${path_new#/}/$path_part"
-
-        if [[ -f "$path_new/.terraform.lock.hcl" ]]; then
-          log INFO "replacing '$path' with '$path_new'"
-          pruned_changed_paths+=("$path_new")
-          continue 2
-        fi
+declare -A realms=()
+for file in "${changed_files[@]}"; do
+  case "${file}" in
+    terraform/modules/* | schemas/*)
+      log INFO "'${file}' affects all realms"
+      for realm in "${all_realms[@]}"; do
+        realms["${realm}"]=1
       done
+      ;;
+    realms/*.yaml)
+      realm="$(basename "${file}" .yaml)"
+      ;;
+    terraform/realms/*/*)
+      realm="$(echo "${file}" | cut -d/ -f3)"
+      ;;
+    *)
+      log INFO "ignoring changes in '${file}' - this is not a realm config path"
+      continue
+      ;;
+  esac
 
-      log INFO "ignoring changes in '${path}' - no .terraform.lock.hcl file"
+  if [[ -n "${realm:-}" ]]; then
+    if [[ -f "terraform/realms/${realm}/.terraform.lock.hcl" ]]; then
+      realms["${realm}"]=1
+    else
+      log INFO "ignoring changes in '${file}' - terraform/realms/${realm} is not a terraform root"
     fi
-  else
-      log INFO "ignoring changes in '${path}' - this is not a valid configuration path"
+    unset realm
   fi
 done
 
-# Remove duplicates
-pruned_changed_paths=($(echo "${pruned_changed_paths[@]}" | tr ' ' '\n' | sort -u))
-
-# Convert to JSON-encoded string
-configJson="$(jq --null-input '$ARGS.positional' --args -- "${pruned_changed_paths[@]}" | jq --compact-output 'map(. | ltrimstr("terraform/realms/"))')"
+configJson="$(printf '%s\n' "${!realms[@]}" | sort | jq --raw-input --slurp --compact-output 'split("\n") | map(select(. != ""))')"
 
 if [[ -n ${GITHUB_OUTPUT+x} ]]; then
-  echo "matrix=$configJson" | tee -a $GITHUB_OUTPUT
+  echo "matrix=$configJson" | tee -a "$GITHUB_OUTPUT"
 else
   echo "matrix=$configJson"
 fi

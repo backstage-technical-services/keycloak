@@ -1,9 +1,6 @@
 networks:
   main:
     name: bts-keycloak
-  v4:
-    name: bts-v4
-    external: true
 
 services:
   database:
@@ -30,26 +27,28 @@ services:
       dockerfile: Dockerfile
     networks:
       - main
-      - v4
     ports:
       - '8081:8080'
       - '9000:9000'
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT: 'false'
+      KC_PROXY_HEADERS: 'xforwarded'
+      KC_HTTP_ENABLED: 'true'
+      KC_HTTP_MANAGEMENT_SCHEME: http
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
       KC_DB_URL_HOST: database
       KC_DB_URL_PORT: 5432
       KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
-    command:
-      - start-dev
     healthcheck:
-      test: [ 'CMD-SHELL', "[ $(curl -s -f http://localhost:9000/health | jq -r '.status') == 'UP']" ]
+      test: [ 'CMD-SHELL', "[ \"$(curl -s -f http://localhost:9000/health | jq -r '.status')\" == 'UP' ]" ]
       interval: 30s
       timeout: 5s
-      retries: 2
+      retries: 5
+      start_period: 120s
     depends_on:
       database:
         condition: service_healthy
