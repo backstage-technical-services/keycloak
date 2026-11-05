@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 1.7"
+  required_version = "~> 1.10"
 
   required_providers {
     aws = {
@@ -13,12 +13,12 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "bnjns-terraform"
-    key            = "backstage/keycloak/nonprod.tfstate"
-    dynamodb_table = "bnjns-terraform-lock"
-    encrypt        = true
-    region         = "eu-west-1"
-    profile        = "backstage"
+    bucket       = "bnjns-terraform"
+    key          = "backstage/keycloak/nonprod.tfstate"
+    use_lockfile = true
+    encrypt      = true
+    region       = "eu-west-1"
+    profile      = "backstage"
   }
 }
 
