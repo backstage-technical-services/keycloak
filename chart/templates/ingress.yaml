@@ -51,7 +51,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: realm-redirect
+  name: redirect-root-to-prod-console
 spec:
   redirectRegex:
     regex: '^https?://auth\.bts-crew\.com/?$'
