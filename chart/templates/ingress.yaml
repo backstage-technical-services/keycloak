@@ -88,7 +88,7 @@ spec:
       match: Host(`auth.bts-crew.com`) && PathPrefix(`/`)
       middlewares:
         - name: rate-limit
-        - name: realm-redirect
+        - name: redirect-root-to-prod-console
       services:
         - kind: Service
           name: {{ include "keycloak.fullname" . }}
