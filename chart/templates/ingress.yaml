@@ -49,6 +49,16 @@ spec:
           name: noop@internal
 ---
 apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: realm-redirect
+spec:
+  redirectRegex:
+    regex: '^https?://auth\.bts-crew\.com/?$'
+    replacement: 'https://auth.bts-crew.com/realms/prod/account/'
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: {{ include "keycloak.fullname" . }}-https
@@ -78,6 +88,7 @@ spec:
       match: Host(`auth.bts-crew.com`) && PathPrefix(`/`)
       middlewares:
         - name: rate-limit
+        - name: realm-redirect
       services:
         - kind: Service
           name: {{ include "keycloak.fullname" . }}
